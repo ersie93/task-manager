@@ -28,12 +28,8 @@ test('Should signup new user', async () => {
 		password: 'ryan1234'
 	}).expect(201)
 
-	// Assert that the database was changed correctly
-
 	const user = await User.findById(response.body.user._id)
 	expect(user).not.toBeNull()
-
-	// Assertions about the response
 
 	expect(response.body).toMatchObject({
 		user: {
@@ -96,5 +92,40 @@ test('Should not delete account for unauthorized user', async () => {
 		.delete('/users/me')
 		.send()
 		.expect(401)
+})
+
+test('Should upload avatar image', async () => {
+	await request(app)
+		.post('/users/me/avatar')
+		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+		.attach('avatar', 'tests/fixtures/profile.png')
+		.expect(200)
+
+	const user = await User.findById(userOneId)
+	expect(user.avatar).toEqual(expect.any(Buffer))
+})
+
+test('Should upate valid user fields', async () => {
+	await request(app)
+		.patch('/users/me')
+		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+		.send({
+			name: 'Ryan Erswell'
+		})
+		.expect(200)
+
+	const user = await User.findById(userOneId)
+	expect(user.name).toBe('Ryan Erswell')
+
+})
+
+test('Should not update invalid user field', async () => {
+	await request(app)
+		.patch('/users/me')
+		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+		.send({
+			location: "the moon"
+		})
+		.expect(400)
 })
 

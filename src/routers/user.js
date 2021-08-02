@@ -80,7 +80,7 @@ router.delete('/users/me', auth, async (req, res) => {
 	}
 })
 
-const upload = multer({
+const attach = multer({
 	limits: {
 		fileSize: 1000000
 	},
@@ -92,7 +92,7 @@ const upload = multer({
 	}
 })
 
-router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+router.post('/users/me/avatar', auth, attach.single('avatar'), async (req, res) => {
 	const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
 	req.user.avatar = buffer
 	await req.user.save()
